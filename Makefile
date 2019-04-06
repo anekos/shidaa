@@ -1,7 +1,12 @@
 
-SRCS := $(wildcard $(src/*.rs))
+SRCS := $(wildcard $(src/*.rs)) Cargo.lock Cargo.toml
 
-release: $(SRCS)
+.PHONY: test
+
+test: $(SRCS)
+	cargo test
+
+target/release/shidaa: $(SRCS)
 	cargo build --release
 
 sample.png: $(SRCS)
