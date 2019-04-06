@@ -30,8 +30,8 @@ pub struct Generator {
 
 impl Generator {
     pub fn new(config: Config) -> Self {
-        let background_color =  color_to_u32(&config.background_color);
-        let fern_color = color_to_u32(&config.fern_color);
+        let background_color =  color_to_u32(config.background_color);
+        let fern_color = color_to_u32(config.fern_color);
         Self {
             background_color,
             config,
@@ -58,7 +58,7 @@ impl Generator {
 
             buffer.resize((self.config.width * self.config.height) as usize, 0);
             self.reset(&mut buffer);
-            self.process(&mut buffer, self.config.length as i64  + i as i64 * 5, 0.0, 0.0);
+            self.process(&mut buffer, i64::from(self.config.length)  + i64::from(i) * 5, 0.0, 0.0);
 
             unsafe {
                 let ptr = buffer.as_mut_ptr() as *mut u8;
@@ -75,8 +75,8 @@ impl Generator {
     }
 
     fn reset(&mut self, buffer: &mut [u32]) {
-        for i in 0 .. (self.config.width * self.config.height) as usize {
-            buffer[i] = self.background_color;
+        for ptr in buffer.iter_mut() {
+            *ptr = self.background_color;
         }
     }
 
@@ -93,8 +93,8 @@ impl Generator {
                 self.process(buffer, k - 1, w4x(x, y), w4y(x, y));
             }
         } else {
-            let xi = (x + 0.5) * 0.98 * self.config.width as f64;
-            let yi = (1.0 - y * 0.98) * self.config.height as f64;
+            let xi = (x + 0.5) * 0.98 * f64::from(self.config.width);
+            let yi = (1.0 - y * 0.98) * f64::from(self.config.height);
             let (xi, yi) = (xi.floor() as usize, yi.floor() as usize);
             let base = yi * self.config.width as usize + xi;
             buffer[base] = self.fern_color;
@@ -110,10 +110,10 @@ fn w2y(x: f64, y: f64) -> f64 { x * 0.302 + 0.141 * y + 0.127 }
 fn w3x(x: f64, y: f64) -> f64 { x * 0.141 + -0.302 * y }
 fn w3y(x: f64, y: f64) -> f64 { x * 0.302 + 0.141 * y + 0.169 }
 fn w4x(_: f64, _: f64) -> f64 { 0.0 }
-fn w4y(_: f64, y: f64) -> f64 { 0.175337 * y }
+fn w4y(_: f64, y: f64) -> f64 { 0.175_337 * y }
 
-fn color_to_u32(color: &CssColor) -> u32 {
+fn color_to_u32(color: CssColor) -> u32 {
     let a = color.a * 255.0;
     let a = if 255.0 < a { 255 } else { a as u32 };
-    color.r as u32 + ((color.g as u32) << 8) + ((color.b as u32) << 16) + (a << 24)
+    u32::from(color.r) + (u32::from(color.g) << 8) + (u32::from(color.b) << 16) + (a << 24)
 }
